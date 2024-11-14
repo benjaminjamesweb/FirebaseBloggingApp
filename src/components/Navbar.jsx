@@ -18,10 +18,30 @@ const Navbar = () => {
         }
     }
 
+    const goHome = async () => {
+        try {
+            navigate('/home');
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const viewFavorites = async () => {
+        try {
+            navigate('/likes');
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
     return (
         <AppBar style={{ display: 'flex', alignItems: 'flex-end' }}>
             <Toolbar>
                 <Box display="flex" alignItems="flex-end">
+                <Button onClick={viewFavorites} variant="outlined" style={{ color: 'white', border: '1px solid white' }}>Likes</Button>
+
+                    <Button onClick={goHome} variant="outlined" style={{ color: 'white', border: '1px solid white' }}>Home</Button>
                     <Button onClick={handleSignout} variant="outlined" style={{ color: 'white', border: '1px solid white' }}>Signout</Button>
                 </Box>
             </Toolbar>

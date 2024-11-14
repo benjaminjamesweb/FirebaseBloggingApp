@@ -18,7 +18,7 @@ const CreateBlog = () => {
 
     const [currentUser, setCurrentUser] = useLocalStorage('current_user', null);
     const [blogInfo, setBlogInfo] = useState({
-        userId: currentUser.uid
+        userId: currentUser ? currentUser.uid : null
     });
     const blogCollectionReference = collection(db, "blogs");
     const [alertConfig, setAlertConfig] = useState({});
@@ -40,21 +40,21 @@ const CreateBlog = () => {
 
 
     return (
-        <Box border="1px solid black" padding="50px" borderRadius="12px" display="flex" flexDirection="column" gap="20px" >
+        <Box border="1px solid black" InputProps={{ style: { color: 'black' } }} padding="50px" borderRadius="12px" display="flex" flexDirection="column" gap="20px" >
             <Typography variant="h3">Create your own Blogs</Typography>
-            <TextField style={{color: 'white'}} type="text" placeholder='Enter Blog Title here!' value={blogInfo.title} onChange={(e) => setBlogInfo({ ...blogInfo, title: e.target.value })} />
+            <TextField InputProps={{ style: { color: 'black' } }} type="text" placeholder='Enter Blog Title here!' value={blogInfo.title} onChange={(e) => setBlogInfo({ ...blogInfo, title: e.target.value })} />
 
-            <TextField type="text" placeholder='Enter Blog Description here!' value={blogInfo.description} onChange={(e) => setBlogInfo({ ...blogInfo, description: e.target.value })} />
+            <TextField type="text" InputProps={{ style: { color: 'black' } }} placeholder='Enter Blog Description here!' value={blogInfo.description} onChange={(e) => setBlogInfo({ ...blogInfo, description: e.target.value })} />
 
             <Box display="flex" gap="4px">
                 {
                     categories.map((category) => {
-                        return <Chip label={category} variant="outlined" onClick={() => handleCategoryClick(category)} />
+                        return <Chip label={category} variant="outlined" InputProps={{ style: { color: 'black' } }} onClick={() => handleCategoryClick(category)} />
                     })
                 }
 
             </Box>
-            <TextField type="text" placeholder='Please Paste url of the image' value={blogInfo.image} onChange={(e) => setBlogInfo({ ...blogInfo, image: e.target.value })} />
+            <TextField type="text" InputProps={{ style: { color: 'black' } }} placeholder='Please Paste url of the image' value={blogInfo.image} onChange={(e) => setBlogInfo({ ...blogInfo, image: e.target.value })} />
 
             <Button variant="contained" onClick={handleCreateBlog}>Create Blog</Button>
             <Alert alertConfig={alertConfig} />

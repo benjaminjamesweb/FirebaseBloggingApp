@@ -44,6 +44,7 @@ const SignInPage = () => {
           label="Email"
           defaultValue=""
           placeholder='Enter your email'
+          InputProps={{ style: { color: 'black' } }}
           type='email'
           value={credentials.email}
           onChange={(e) => setCredentials({
@@ -58,6 +59,7 @@ const SignInPage = () => {
           defaultValue=""
           placeholder='Enter your Password'
           type='password'
+          InputProps={{ style: { color: 'black' } }}
           value={credentials.password}
           onChange={(e) => setCredentials({
             ...credentials,

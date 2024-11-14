@@ -43,6 +43,7 @@ const SignupPage = () => {
                 defaultValue=""
                 placeholder='Enter your email'
                 type='email'
+                InputProps={{ style: { color: 'black' } }}
                 value={credentials.email}
                 onChange={(e) => setCredentials({
                     ...credentials,
@@ -56,6 +57,7 @@ const SignupPage = () => {
                 defaultValue=""
                 placeholder='Enter your Password'
                 type='password'
+                InputProps={{ style: { color: 'black' } }}
                 value={credentials.password}
                 onChange={(e) => setCredentials({
                     ...credentials,

@@ -1,61 +1,82 @@
 import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
 import { Box, Divider, Typography } from '@mui/material';
 import BlogCard from '../components/BlogCard';
 import Alert from '../components/Alert';
+import { getAuth } from 'firebase/auth';
 
 const ViewBlogsPage = () => {
+    const [blogsList, setBlogsList] = useState([]);
+    const [favoritesList, setFavoritesList] = useState([]); // Store user's favorite blog IDs
+    const [alertConfig, setAlertConfig] = useState({});
+    const userId = getAuth().currentUser?.uid;
 
     const blogCollectionReference = collection(db, "blogs");
-    const [blogsList, setBlogsList] = useState([]);
-    const [alertConfig, setAlertConfig] = useState({});
 
+    // Fetch all blogs from Firestore
     const getBlogsList = async () => {
         const blogs = await getDocs(blogCollectionReference);
-        const extractedBlogs = blogs.docs.map((doc) => {
-            return {
-                id: doc.id,
-                ...doc.data()
-            }
-        })
-
+        const extractedBlogs = blogs.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+        }));
         setBlogsList(extractedBlogs);
-        console.log(extractedBlogs, 'blogs')
-    }
+    };
+
+    // Fetch the user's favorites list from Firestore
+    const getFavoritesList = async () => {
+        if (!userId) return; // Ensure the user is logged in
+        const favoritesCollectionRef = collection(db, 'users', userId, 'favorites');
+        const favoritesSnapshot = await getDocs(favoritesCollectionRef);
+        const favoriteIds = favoritesSnapshot.docs.map(doc => doc.id);
+        setFavoritesList(favoriteIds);
+    };
 
     const deleteBlog = async (id) => {
-        // First get the doc you want to delete
-        const blogDoc = doc(db, "blogs", id); // We will get the  blog we are trying to delete.
-
-        console.log(blogDoc, 'blogDoc'); 
+        const blogDoc = doc(db, "blogs", id);
         try {
             await deleteDoc(blogDoc);
-            setAlertConfig({...alertConfig, message:'Succesfully deleted the blog', color: 'success', isOpen: true })
+            setAlertConfig({
+                message: 'Successfully deleted the blog',
+                color: 'success',
+                isOpen: true
+            });
+            setBlogsList((prevList) => prevList.filter((blog) => blog.id !== id));
         } catch (error) {
-            setAlertConfig({...alertConfig, message:'Error Deleting the blog', color: 'error', isOpen: true })
+            setAlertConfig({
+                message: 'Error deleting the blog',
+                color: 'error',
+                isOpen: true
+            });
         }
-    }
-    
+    };
+
     useEffect(() => {
         getBlogsList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [alertConfig])
+        getFavoritesList();
+    }, [userId]);
 
     return (
         <Box display="flex" flexDirection="column" gap="20px">
             <Typography variant="h3">View Blogs</Typography>
             <Divider />
-            <Box display="grid" gridTemplateColumns="33% 33% 33%" gap="12px">
-                {
-                    blogsList.map((blog, index) => {
-                        return <BlogCard key={index} blog={blog} deleteBlog={deleteBlog} />
-                    })
-                }
+            <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="12px">
+                {blogsList.map((blog) => (
+                    <BlogCard 
+                        key={blog.id} 
+                        blog={blog} 
+                        userId={userId} 
+                        isFavorited={favoritesList.includes(blog.id)} // Set isFavorited based on favorites list
+                        handleFavoriteClick={() => toggleFavorite(blog.id)} 
+                        deleteBlog={() => deleteBlog(blog.id)} 
+                        showDeleteIcon={true}
+                    />
+                ))}
             </Box>
             <Alert alertConfig={alertConfig} />
         </Box>
-    )
-}
+    );
+};
 
-export default ViewBlogsPage
+export default ViewBlogsPage;
