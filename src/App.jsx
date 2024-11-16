@@ -7,7 +7,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import ViewBlogsPage from './pages/ViewBlogsPage';
 import ViewBlogDetailsPage from './pages/ViewBlogDetailsPage';
 import Navbar from './components/Navbar';
-import ViewFavoritesPage from './pages/ViewFavoritesPage';
+import ViewLikesPage from './pages/ViewLikesPage';
 
 function App() {
   // React Router Setup
@@ -31,7 +31,7 @@ function App() {
     },
     {
       path: '/likes',
-      element: <ViewFavoritesPage />
+      element: <ViewLikesPage />
     },
     {
       path: '/viewblogs/:id',

@@ -6,35 +6,41 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
-const BlogCard = ({ blog, deleteBlog, showDeleteIcon = true, userId, isFavorited: initialFavorited }) => {
-    const [isFavorited, setIsFavorited] = useState(initialFavorited || false);
+const BlogCard = ({ blog, deleteBlog, showDeleteIcon = true, userId, isLiked: initiallyLiked }) => {
+
+// Note to Prabh: the purpose of the initiallyLiked variable is so that posts a user has previously liked (in a previous session) will reappear as liked when they log back in.
+    const [isLiked, setIsLiked] = useState(initiallyLiked || false);
     const navigate = useNavigate();
 
+    // Previously-liked posts display as liked (red color) upon login
     useEffect(() => {
-        setIsFavorited(initialFavorited || false);
-    }, [initialFavorited]);
+        setIsLiked(initiallyLiked || false);
+    }, [initiallyLiked]);
 
-    const handleFavoriteClick = async () => {
+
+    const handleLike = async () => {
         if (userId && blog.id) {
-            setIsFavorited(!isFavorited);
-            await toggleFavorite(blog.id, userId);
+            setIsLiked(!isLiked);
+            await manageLikesCollection(blog.id, userId);
         } else {
-            console.error("Missing userId or blog.id:", { userId, blogId: blog.id });
+            console.error("Could not find user or blog ID. Try logging in again.");
         }
     };
 
-    const toggleFavorite = async (postId, userId) => {
+
+// Note to Prabh: in order for the liked posts to stay liked after logging out and logging back in again, I had to create an extra collection (users/likes) to store users' liked posts
+    const manageLikesCollection = async (postId, userId) => {
         try {
-            const favoriteRef = doc(db, 'users', userId, 'favorites', postId);
-            if (isFavorited) {
-                await deleteDoc(favoriteRef);
-                console.log("Removed from favorites:", postId);
+            const likeRef = doc(db, 'users', userId, 'likes', postId);
+            if (isLiked) {
+                await deleteDoc(likeRef);
+                console.log("Blog has been removed from likes", postId);
             } else {
-                await setDoc(favoriteRef, { postId, favoritedAt: new Date() });
-                console.log("Added to favorites:", postId);
+                await setDoc(likeRef, { postId, LikedAt: new Date() });
+                console.log("Blog has been added to likes", postId);
             }
         } catch (error) {
-            console.error("Error toggling favorite:", error);
+            console.error("Error liking/unliking this blog, please refresh", error);
         }
     };
 
@@ -65,8 +71,8 @@ const BlogCard = ({ blog, deleteBlog, showDeleteIcon = true, userId, isFavorited
                 <Chip label={blog.category} variant="outlined" />
             </CardContent>
             <CardActions>
-                <IconButton onClick={handleFavoriteClick}>
-                    <FavoriteIcon color={isFavorited ? 'error' : 'disabled'} />
+                <IconButton onClick={handleLike}>
+                    <FavoriteIcon color={isLiked ? 'error' : 'disabled'} />
                 </IconButton>
                 <Button color="secondary" variant="contained" onClick={() => navigate(`/viewblogs/${blog.id}`)}>
                     Learn More
